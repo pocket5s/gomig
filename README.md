@@ -1,0 +1,2 @@
+# gomig
+SQL migration tool
