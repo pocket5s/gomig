@@ -39,7 +39,6 @@ var tpl = `-- // %s
 -- //@UNDO
 -- SQL to undo the migration here`
 
-// newCmd represents the new command
 var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Creates a new migration file.",
