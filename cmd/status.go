@@ -47,6 +47,7 @@ var statusCmd = &cobra.Command{
 			return
 		}
 
+		fmt.Println("")
 		fmt.Printf("+%s+\n", strings.Repeat("-", 78))
 		fmt.Printf("| %-45s | %-28s |\n", "File Name", "Migration Ran At")
 		fmt.Printf("+%s+\n", strings.Repeat("-", 78))
@@ -58,8 +59,7 @@ var statusCmd = &cobra.Command{
 				log.Fatal("could not scan row for migration information")
 				return
 			}
-			t := time.UnixMilli(ranAt)
-			fmt.Printf("| %-45s | %-28s |\n", name, t.Format(time.UnixDate))
+			fmt.Printf("| %-45s | %-28s |\n", name, time.UnixMilli(ranAt).Format(time.UnixDate))
 		}
 		fmt.Printf("+%s+\n", strings.Repeat("-", 78))
 	},
