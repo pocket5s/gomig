@@ -1,2 +1,2 @@
-# gomig
+# GoMig
 SQL migration tool
