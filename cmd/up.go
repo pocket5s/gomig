@@ -70,6 +70,7 @@ var upCmd = &cobra.Command{
 				for _, file := range files {
 					if file.Name() == mostRecentFile {
 						found = true
+						continue
 					}
 
 					if found {
