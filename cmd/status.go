@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -46,6 +47,9 @@ var statusCmd = &cobra.Command{
 			return
 		}
 
+		fmt.Printf("+%s+\n", strings.Repeat("-", 85))
+		fmt.Printf("| %-40s | %-40s |\n", "File Name", "Migration Ran At")
+		fmt.Printf("+%s+\n", strings.Repeat("-", 85))
 		for rows.Next() {
 			var name string
 			var ranAt int64
@@ -55,8 +59,9 @@ var statusCmd = &cobra.Command{
 				return
 			}
 			t := time.UnixMilli(ranAt)
-			fmt.Println(name, " ran at ", t.Format(time.UnixDate))
+			fmt.Printf("| %-40s | %-40s |\n", name, t.Format(time.UnixDate))
 		}
+		fmt.Printf("+%s+\n", strings.Repeat("-", 85))
 	},
 }
 
