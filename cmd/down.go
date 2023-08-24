@@ -4,7 +4,10 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
+	"database/sql"
+	"errors"
+	"log"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -15,7 +18,52 @@ var downCmd = &cobra.Command{
 	Short: "Runs the UNDO of the most recent migration.",
 	Long:  `Runs the UNDO of the most recent migration against the desired database.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("down called")
+		err := connect()
+		if err != nil {
+			log.Fatal(err)
+		}
+		var downCount int
+		if len(args) == 0 {
+			downCount = 1
+		} else {
+			i, err := strconv.Atoi(args[0])
+			if err != nil {
+				log.Fatal("arg needs to be a number")
+				return
+			}
+			downCount = i
+		}
+
+		rows, err := DB.Query("SELECT name FROM migrations ORDER BY ran_at DESC LIMIT ?", downCount)
+		if err != nil {
+			log.Fatal("could not query for migrations to downgrade: %v", err)
+			return
+		}
+
+		fileNames := make([]string, 0)
+		for rows.Next() {
+			var fileName string
+			err := rows.Scan(&fileName)
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				log.Fatal("could not get migration file name from db: %v", err)
+				return
+			} else {
+				fileNames = append(fileNames, fileName)
+			}
+		}
+
+		migrationDir := "./migrations"
+		//sort.Sort(sort.Reverse(sort.StringSlice(fileNames)))
+
+		for _, fileName := range fileNames {
+			mf := parseFile(migrationDir + "/" + fileName)
+			err := executeTransaction(mf.undoSql, false, fileName)
+			if err != nil {
+				log.Fatal("could not run down migration on file ", fileName)
+				return
+			}
+		}
+		log.Println("migrations complete")
 	},
 }
 

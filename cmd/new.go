@@ -6,6 +6,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -40,7 +41,7 @@ var newCmd = &cobra.Command{
 		output := fmt.Sprintf(tpl, args[0])
 		err := os.WriteFile("./migrations/"+filename, []byte(output), 0644)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		fmt.Println("migration file created")
 	},

@@ -4,8 +4,10 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"database/sql"
+	"errors"
+	"io/ioutil"
 	"log"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -17,30 +19,59 @@ var upCmd = &cobra.Command{
 	Long:  `Applies any pending migrations to the desired database`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			//TODO: read db to see latest migration
-
-			//TODO: scan migrations dir for new files
-
-			//TODO: load migration sql and parse
-			fileName := "./migrations/20230822223837_a_new_migration.sql"
-			mf := parseFile(fileName)
-
-			err := executeTransaction(mf.sqlToRun)
+			err := connect()
 			if err != nil {
-				os.Exit(1)
+				log.Fatal(err)
 			}
-			log.Printf("Migration %s run", fileName)
+			var mostRecentFile string
+			result := DB.QueryRow("SELECT name FROM migrations ORDER BY ran_at DESC LIMIT 1")
+			if result != nil {
+				err := result.Scan(&mostRecentFile)
+				if err != nil && !errors.Is(err, sql.ErrNoRows) {
+					log.Fatal("could not query for latest migration file name from db: %v", err)
+					return
+				}
+			}
+
+			migrationDir := "./migrations"
+			files, err := ioutil.ReadDir(migrationDir)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+
+			if mostRecentFile == "" {
+				mf := parseFile(migrationDir + "/" + files[0].Name())
+				err = executeTransaction(mf.sqlToRun, true, files[0].Name())
+				if err != nil {
+					log.Fatal(err)
+					return
+				}
+			} else {
+				var found bool
+				for _, file := range files {
+					if file.Name() == mostRecentFile {
+						found = true
+					}
+
+					if found {
+						mf := parseFile(migrationDir + "/" + file.Name())
+						err = executeTransaction(mf.sqlToRun, true, file.Name())
+						if err != nil {
+							log.Fatal(err)
+							return
+						}
+					}
+				}
+			}
+
+			log.Println("migrations complete")
 		}
 	},
 }
 
 func init() {
-	err := connect()
-	if err != nil {
-		log.Fatal(err)
-	}
 	rootCmd.AddCommand(upCmd)
-
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

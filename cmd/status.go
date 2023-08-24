@@ -4,7 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -15,7 +15,10 @@ var statusCmd = &cobra.Command{
 	Short: "Shows the status of the current migrations.",
 	Long:  `Shows the status of the current migrations.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("status called")
+		err := connect()
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
