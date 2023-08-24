@@ -52,6 +52,7 @@ var downCmd = &cobra.Command{
 		}
 
 		rows, err := DB.Query("SELECT name FROM migrations ORDER BY ran_at DESC LIMIT ?", downCount)
+		defer rows.Close()
 		if err != nil {
 			log.Fatal("could not query for migrations to downgrade: %v", err)
 			return

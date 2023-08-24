@@ -42,6 +42,7 @@ var statusCmd = &cobra.Command{
 		}
 
 		rows, err := DB.Query("SELECT name, ran_at FROM migrations")
+		defer rows.Close()
 		if err != nil {
 			log.Fatal("could not query for migrations to generate status: %v", err)
 			return
