@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strings"
 	"time"
@@ -47,6 +48,7 @@ var statusCmd = &cobra.Command{
 			return
 		}
 
+		fileNames := make([]string, 0)
 		fmt.Println("")
 		fmt.Printf("+%s+\n", strings.Repeat("-", 78))
 		fmt.Printf("| %-45s | %-28s |\n", "File Name", "Migration Ran At")
@@ -59,10 +61,34 @@ var statusCmd = &cobra.Command{
 				log.Fatal("could not scan row for migration information")
 				return
 			}
+			fileNames = append(fileNames, name)
 			fmt.Printf("| %-45s | %-28s |\n", name, time.UnixMilli(ranAt).Format(time.UnixDate))
+		}
+
+		migrationDir := "./migrations"
+		files, err := ioutil.ReadDir(migrationDir)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		for _, f := range files {
+			if fileNotRan(f.Name(), fileNames) {
+				fmt.Printf("| %-45s | %-28s |\n", f.Name(), "Pending...")
+			}
 		}
 		fmt.Printf("+%s+\n", strings.Repeat("-", 78))
 	},
+}
+
+// yes brute force, but let's face it, the list won't be _that_ big and array scans are fast enough
+func fileNotRan(fileName string, fileList []string) bool {
+	for _, name := range fileList {
+		if name == fileName {
+			return false
+		}
+	}
+
+	return true
 }
 
 func init() {
