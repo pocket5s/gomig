@@ -1,0 +1,16 @@
+version: '3.7'
+services:
+  gomig:
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    tty: true
+    environment:
+      - DB_URL=
+    volumes:
+      - ../:/go/src/github.com/pocket5s/gomig
+    networks:
+      - gomig-net
+networks:
+  gomig-net:
+    name: gomignet
