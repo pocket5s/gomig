@@ -35,6 +35,10 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
+	err := connect()
+	if err != nil {
+		log.Fatal(err)
+	}
 	rootCmd.AddCommand(upCmd)
 
 	// Here you will define your flags and configuration settings.

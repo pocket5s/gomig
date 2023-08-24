@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"log"
 	"os"
 	"strings"
 )
@@ -16,7 +17,7 @@ func parseFile(file string) migrationFile {
 	f, err := os.Open(file)
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer f.Close()
 
@@ -42,7 +43,7 @@ func parseFile(file string) migrationFile {
 	mf.undoSql = strings.Split(undo, ";")
 
 	if err := scanner.Err(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	return mf
 }
