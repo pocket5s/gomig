@@ -22,7 +22,9 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -36,6 +38,24 @@ var statusCmd = &cobra.Command{
 		err := connect()
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		rows, err := DB.Query("SELECT name, ran_at FROM migrations")
+		if err != nil {
+			log.Fatal("could not query for migrations to generate status: %v", err)
+			return
+		}
+
+		for rows.Next() {
+			var name string
+			var ranAt int64
+			err = rows.Scan(&name, &ranAt)
+			if err != nil {
+				log.Fatal("could not scan row for migration information")
+				return
+			}
+			t := time.UnixMilli(ranAt)
+			fmt.Println(name, " ran at ", t.Format(time.UnixDate))
 		}
 	},
 }
