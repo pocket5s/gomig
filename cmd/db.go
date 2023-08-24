@@ -39,7 +39,6 @@ func connect() error {
 	if DB != nil {
 		return nil
 	}
-	log.Println("DB_TYPE:", viper.GetString("GOMIG_DB_TYPE"))
 	db, err := sql.Open(viper.GetString("GOMIG_DB_TYPE"), viper.GetString("GOMIG_CONN_STR"))
 	if err == nil {
 		DB = db
