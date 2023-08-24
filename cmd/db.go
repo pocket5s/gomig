@@ -66,8 +66,7 @@ func executeTransaction(statements []string, up bool, fileName string) error {
 	}
 
 	if up {
-		migInsert := fmt.Sprintf("INSERT INTO migrations (name, ran_at) VALUES ('%s', %d);", fileName, time.Now().UnixNano())
-		tx.Exec(migInsert)
+		tx.Exec("INSERT INTO migrations (name, ran_at) VALUES (?, ?);", fileName, time.Now().UnixMilli())
 	} else {
 		tx.Exec("DELETE FROM migrations WHERE name = ?", fileName)
 	}
