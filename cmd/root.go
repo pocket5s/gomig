@@ -60,6 +60,7 @@ func initConfig() {
 		cobra.CheckErr(err)
 
 		viper.AddConfigPath(home)
+		viper.AddConfigPath("./")
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".gomig")
 	}

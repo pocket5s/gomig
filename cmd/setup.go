@@ -25,13 +25,31 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-var migrationTable = `
+var sqliteMigrationTable = `
     CREATE TABLE IF NOT EXISTS migrations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name varchar(255),
-        ran_at int
+        name VARCHAR(255) NOT NULL,
+        ran_at INT NOT NULL
+    );
+`
+
+var postgresMigrationTable = `
+    CREATE TABLE IF NOT EXISTS migrations (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        ran_at INT NOT NULL
+    );
+`
+
+var mysqlMigrationTable = `
+    CREATE TABLE IF NOT EXISTS migrations (
+        id MEDIUMINT NOT NULL AUTO_INCREMENT,
+        name VARCHAR(255) NOT NULL,
+        ran_at BIGINT NOT NULL,
+        PRIMARY KEY (id)
     );
 `
 
@@ -44,6 +62,19 @@ var setupCmd = &cobra.Command{
 		err := connect()
 		if err != nil {
 			log.Fatal("could not connect to database", err)
+			return
+		}
+
+		migrationTable := ""
+		dbType := viper.GetString("GOMIG_DB_TYPE")
+		if dbType == "sqlite" {
+			migrationTable = sqliteMigrationTable
+		} else if dbType == "pgx" {
+			migrationTable = postgresMigrationTable
+		} else if dbType == "mysql" {
+			migrationTable = mysqlMigrationTable
+		} else {
+			log.Fatal("Unknown db type: ", dbType)
 			return
 		}
 		_, err = DB.Exec(migrationTable)

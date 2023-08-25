@@ -28,9 +28,10 @@ import (
 	"log"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/viper"
 	_ "modernc.org/sqlite"
-	//_ "github.com/lib/pq"
 )
 
 var DB *sql.DB
