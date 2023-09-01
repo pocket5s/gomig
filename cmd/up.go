@@ -46,7 +46,7 @@ var upCmd = &cobra.Command{
 			if result != nil {
 				err := result.Scan(&mostRecentFile)
 				if err != nil && !errors.Is(err, sql.ErrNoRows) {
-					log.Fatal("could not query for latest migration file name from db: %v", err)
+					log.Fatal("could not query for latest migration file name from db: ", err)
 					return
 				}
 			}
@@ -58,28 +58,23 @@ var upCmd = &cobra.Command{
 				return
 			}
 
-			if mostRecentFile == "" {
-				mf := parseFile(migrationDir + "/" + files[0].Name())
-				err = executeTransaction(mf.sqlToRun, true, files[0].Name())
-				if err != nil {
-					log.Fatal(err)
-					return
+			var found bool
+			for _, file := range files {
+				if mostRecentFile == "" {
+					found = true
 				}
-			} else {
-				var found bool
-				for _, file := range files {
-					if file.Name() == mostRecentFile {
-						found = true
-						continue
-					}
+				if file.Name() == mostRecentFile {
+					found = true
+					continue
+				}
 
-					if found {
-						mf := parseFile(migrationDir + "/" + file.Name())
-						err = executeTransaction(mf.sqlToRun, true, file.Name())
-						if err != nil {
-							log.Fatal(err)
-							return
-						}
+				if found {
+					mf := parseFile(migrationDir + "/" + file.Name())
+					log.Println("executing ", file.Name())
+					err = executeTransaction(mf.sqlToRun, true, file.Name())
+					if err != nil {
+						log.Fatal(err)
+						return
 					}
 				}
 			}
