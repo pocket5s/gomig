@@ -9,6 +9,7 @@
 *.dylib
 migrations/*
 *.db
+gomig
 
 # Test binary, built with `go test -c`
 *.test
