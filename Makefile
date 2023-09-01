@@ -16,12 +16,12 @@ cover:
 
 clean:
 	go clean
-	rm migrate
+	rm gomig
 
 run:
 	go run cmd/main.go
 
 build:
 	@-$(MAKE) -s clean
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o app cmd/main.go
-	chmod +x migrate
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o gomig main.go
+	chmod +x gomig
