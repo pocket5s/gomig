@@ -16,12 +16,13 @@ cover:
 
 clean:
 	go clean
-	rm gomig
+	rm -f gomig
 
 run:
 	go run cmd/main.go
 
 build:
-	@-$(MAKE) -s clean
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o gomig main.go
+	rm -f gomig
+	#CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o gomig main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o gomig main.go
 	chmod +x gomig
