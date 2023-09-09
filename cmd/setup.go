@@ -67,7 +67,7 @@ var setupCmd = &cobra.Command{
 
 		migrationTable := ""
 		dbType := viper.GetString("GOMIG_DB_TYPE")
-		if dbType == "sqlite" {
+		if dbType == "libsql" {
 			migrationTable = sqliteMigrationTable
 		} else if dbType == "pgx" {
 			migrationTable = postgresMigrationTable
