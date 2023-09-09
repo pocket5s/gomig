@@ -30,8 +30,12 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/spf13/viper"
+	_ "github.com/libsql/libsql-client-go/libsql"
+
+	//_ "github.com/mattn/go-sqlite3"
 	_ "modernc.org/sqlite"
+
+	"github.com/spf13/viper"
 )
 
 var DB *sql.DB
@@ -40,7 +44,8 @@ func connect() error {
 	if DB != nil {
 		return nil
 	}
-	db, err := sql.Open(viper.GetString("GOMIG_DB_TYPE"), viper.GetString("GOMIG_CONN_STR"))
+	//db, err := sql.Open(viper.GetString("GOMIG_DB_TYPE"), viper.GetString("GOMIG_CONN_STR"))
+	db, err := sql.Open("libsql", viper.GetString("GOMIG_CONN_STR"))
 	if err == nil {
 		DB = db
 		return DB.Ping()
@@ -58,11 +63,14 @@ func executeTransaction(statements []string, up bool, fileName string) error {
 		return fmt.Errorf("could not start db transaction")
 	}
 	for _, s := range statements {
-		_, txErr := tx.Exec(s)
-		if txErr != nil {
-			tx.Rollback()
-			log.Printf("sql execution err: %v", txErr)
-			return fmt.Errorf("could not execute %s", s)
+		if s != "" {
+			log.Printf("executing: %s", s)
+			_, txErr := tx.Exec(s)
+			if txErr != nil {
+				tx.Rollback()
+				log.Printf("sql execution err: %v", txErr)
+				return fmt.Errorf("could not execute %s", s)
+			}
 		}
 	}
 
